@@ -1,11 +1,32 @@
-import { create } from "zustand";
+import create from "zustand";
+import axios from "axios";
 
-const useStore = create((set) => ({
-  count: 0,
+// 상태 관리
+const weatherInfo = create((set) => ({
+  weather: null,
+  city: "",
+  loading: false,
+  error: null,
 
-  increase: () => set((state) => ({ count: state.count + 1 })),
+  // 도시 업데이트 함수
+  setCity: (newCity) => set({ city: newCity }),
 
-  decrease: () => set((state) => ({ count: state.count - 1 })),
+  // 날씨 정보 함수
+  fetchWeather: async (city) => {
+    set({ loading: true, error: null }); // 로딩 상태 시작
+
+    try {
+      const response = await axios.get(
+        `https://api.openweathermap.org/data/2.5/weather?q=${city}&appid=7e0a5f955e8fad5833e239784df225dd&units=metric`
+      );
+
+      // 날씨 업데이트
+      set({ weather: response.data, loading: false });
+    } catch (error) {
+      // 오류 발생 시 업데이트
+      set({ error: error.message, loading: false });
+    }
+  },
 }));
 
-export default useStore;
+export default weatherInfo;
